@@ -1,0 +1,25 @@
+{
+  "name": "scribe",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "scribe": "./src/cli.ts"
+  },
+  "scripts": {
+    "scribe": "node --import tsx src/cli.ts",
+    "test": "vitest",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "incur": "^0.3.25"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "latest",
+    "vitest": "latest"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
