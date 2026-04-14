@@ -14,6 +14,7 @@ import {
   whisperBinaryExists,
   ffmpegExists,
 } from './setup.js'
+import { printBanner, Stage } from './ui.js'
 
 const cli = Cli.create('scribe', {
   version: '0.1.0',
@@ -58,17 +59,25 @@ cli.command('transcribe', {
       })
     }
 
-    await ensureWhisperBinary()
-    const modelPath = await ensureModel(c.options.model)
-    const format = c.options.outputAs as OutputFormat
+    if (!c.agent) printBanner()
 
+    const setupStage = new Stage('Checking whisper binary').start()
+    await ensureWhisperBinary()
+    setupStage.done()
+
+    const modelStage = new Stage('Loading model').start()
+    const modelPath = await ensureModel(c.options.model)
+    modelStage.done(c.options.model)
+
+    const format = c.options.outputAs as OutputFormat
     let audioPath = filePath
     let tempWav: string | undefined
 
     if (isVideoFile(filePath)) {
-      console.error('Extracting audio...')
+      const extractStage = new Stage('Extracting audio').start()
       tempWav = await extractAudio(filePath)
       audioPath = tempWav
+      extractStage.done(basename(filePath))
     }
 
     try {
@@ -76,7 +85,7 @@ cli.command('transcribe', {
         ? join(resolve(c.options.outDir), basename(filePath, '.' + filePath.split('.').pop()))
         : join(tmpdir(), `scribe-out-${randomUUID()}`)
 
-      console.error('Transcribing...')
+      const transcribeStage = new Stage('Transcribing').start()
       const result = await runWhisper({
         modelPath,
         audioPath,
@@ -84,6 +93,9 @@ cli.command('transcribe', {
         language: c.options.language,
         outputFile,
       })
+      transcribeStage.done(format)
+
+      process.stderr.write('\n')
 
       if (format === 'json') {
         try {
