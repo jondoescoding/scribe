@@ -28,16 +28,16 @@ cli.command('transcribe', {
   options: z.object({
     model: z.string().default('ggml-small').describe('Model name or absolute path'),
     language: z.string().default('auto').describe('Language code (e.g. en, es) or auto'),
-    format: z.enum(['txt', 'srt', 'vtt', 'json']).default('txt').describe('Output format'),
+    outputAs: z.enum(['txt', 'srt', 'vtt', 'json']).default('txt').describe('Transcript format: txt, srt, vtt, json'),
     outDir: z.string().optional().describe('Directory to write output file'),
   }),
-  alias: { model: 'm', language: 'l', format: 'f', outDir: 'o' },
+  alias: { model: 'm', language: 'l', outputAs: 'f', outDir: 'o' },
   examples: [
     { args: { file: 'video.mp4' }, description: 'Transcribe a video' },
-    { args: { file: 'audio.wav' }, options: { format: 'srt' }, description: 'Transcribe to SRT' },
+    { args: { file: 'audio.wav' }, options: { outputAs: 'srt' }, description: 'Transcribe to SRT' },
     {
       args: { file: 'video.mkv' },
-      options: { format: 'json', language: 'en' },
+      options: { outputAs: 'json', language: 'en' },
       description: 'Transcribe to JSON in English',
     },
   ],
@@ -60,7 +60,7 @@ cli.command('transcribe', {
 
     await ensureWhisperBinary()
     const modelPath = await ensureModel(c.options.model)
-    const format = c.options.format as OutputFormat
+    const format = c.options.outputAs as OutputFormat
 
     let audioPath = filePath
     let tempWav: string | undefined
@@ -98,7 +98,7 @@ cli.command('transcribe', {
         file: basename(filePath),
         model: c.options.model,
         language: c.options.language,
-        format,
+        outputAs: format,
       })
     } finally {
       if (tempWav) await cleanupTempFile(tempWav)

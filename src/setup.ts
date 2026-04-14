@@ -44,7 +44,10 @@ export async function downloadWhisperBinary(): Promise<void> {
   await mkdir(extractDir, { recursive: true })
 
   await new Promise<void>((resolve, reject) => {
-    execFile('tar', ['-xf', zipPath, '-C', extractDir], (error) => {
+    execFile('powershell', [
+      '-NoProfile', '-Command',
+      `Expand-Archive -Path '${zipPath}' -DestinationPath '${extractDir}' -Force`,
+    ], (error) => {
       if (error) {
         reject(new Error(`Could not extract zip. ${error.message}`))
         return
