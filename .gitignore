@@ -3,4 +3,6 @@ dist/
 models/
 bin/
 *.wav
-.env.local
+.env
+.env.*
+docs/superpowers/
